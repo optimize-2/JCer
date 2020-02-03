@@ -100,4 +100,4 @@ string decry(string s,int key);
 
 `JCer开发组` : `707285884`.
 
-`JCer`目前属于[IceLava工作室](http://icelava.top).
+`JCer`目前属于[IceLava团队](http://icelava.top).
