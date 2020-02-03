@@ -249,6 +249,7 @@ public:
 		}
 	}
 };
+_user user;
 
 class teacher {
 private:
@@ -340,7 +341,6 @@ public:
 
 student st[18];
 player jcer;
-_user user;
 teacher tc;
 
 
