@@ -9,6 +9,7 @@ using namespace std;
 #define MAPX ((classic_mode)?(52):((teacher_mode)?81:0))
 #define MAPY ((classic_mode)?(17):((teacher_mode)?17:0))
 #define CLEAR system("cls");gotoxy(0,0)
+#define PAUSE Sleep(100);press=0;while(press==0) {press=getch();}
 
 struct pos;
 struct _user;
@@ -20,7 +21,9 @@ void student_init();
 void player_init();
 void teacher_init();
 void map_init();
-void init();
+void users_init();
+void menus_init();
+void JC_init();
 void game_init();
 void _map();
 void start_classic();
@@ -42,9 +45,8 @@ vector<string>menu[100];
 bool classic_mode;
 bool teacher_mode;
 bool have_JCed_the_teacher=0; 
-/*
-up,down,left,right.
-*/
+string jc0,jc1,jc2,jc3,jc4,jc5,jc6,jc7,jc8,jc9,jc10,jc11;
+char press=0;
 
 struct pos {int x,y;pos(int xx=0,int yy=0) {x=xx;y=yy;}};
 struct _user {
@@ -190,11 +192,13 @@ public:
 		
 	void go_back() {
 		if(s.size()==1) return;
-		print(' ');
-		x=s[s.size()-2].x;
-		y=s[s.size()-2].y;
-		print('o');
-		s.pop_back();
+		if(mapnow[s[s.size()-2].y][s[s.size()-2].x]!='x') {
+			print(' ');
+			x=s[s.size()-2].x;
+			y=s[s.size()-2].y;
+			print('o');
+			s.pop_back();
+		}
 	}
 	
 	void WC() {
@@ -248,6 +252,12 @@ public:
 			print('x');
 		}
 	}
+	void go_back() {
+		print(' ');
+		x=44;
+		y=15;
+		print('x');
+	}
 };
 _user user;
 
@@ -267,14 +277,17 @@ public:
 	teacher(int x2=0,int y2=0) {x=x2,y=y2;s.push_back(pos(x,y));print('O');stay=0;}
 	void go_back() {
 		if(s.size()==1) return;
-		print(' ');
-		x=s[s.size()-2].x;
-		y=s[s.size()-2].y;
-		print('O');
-		s.pop_back();
+		if(mapnow[s[s.size()-2].y][s[s.size()-2].x]!='x') {
+			print(' ');
+			x=s[s.size()-2].x;
+			y=s[s.size()-2].y;
+			print('O');
+			s.pop_back();
+		}
 	}
 	bool on_the_seat() {return (x==s[0].x&&y==s[0].y);}
 	bool check() {return 1;}
+	bool in_the_classroom() {return (x<=52);}
 	void coffee_time() {go=1;flag=0;stay=0;}
 	void move() {
 		if(stay>0) {
@@ -313,10 +326,10 @@ public:
 							if(y==5) {
 								go=0;
 								back=1;
-								if(user.memory1[0]>0) {
-									user.memory1[0]--;
+								if(user.memory1[1]>0) {
+									user.memory1[1]--;
 									stay=30;
-								} stay=10;
+								} else stay=10;
 							} else {
 								print(' ');
 								y++;
@@ -329,6 +342,7 @@ public:
 			} else {
 				if(back) {
 					if(on_the_seat()) {
+						have_JCed_the_teacher=0;
 						back=0;
 					} else {
 						go_back();
@@ -346,25 +360,36 @@ teacher tc;
 
 
 int main() {
-	init();
+	system("mode con cols=120 lines=30");
+	users_init();
 	
 	login();
+	menus_init();
+	JC_init(); 
 menu1:
 	CLEAR;
-	//user.ostrakon=19260817;
 	int now=do_menu(1);
-	if(now==1) {
-menu2:
-		int now2=do_menu(2);
+	int now2;
+	int now3;
+	char c;
+	string passin;
+	string newpass;
+	switch(now)
+	{
+	case 1:
+menu2:		
+		now2=do_menu(2);
 		if(now2==1) {
 			classic_mode=1;
 			start_classic();
+			_save();
 			classic_mode=0;
 			goto menu2;
 		} else {
 			if(now2==2)  {
 				teacher_mode=1;
 				start_teacher();
+				_save();
 				teacher_mode=0;
 				goto menu2;
 			} else {
@@ -375,50 +400,149 @@ menu2:
 				}
 			}
 		}
-	} else {
-		if(now==2) {
+		break;
+	case 2:
 menu3:
-			CLEAR;
-			gotoxy(0,0);
+		CLEAR;
+		if(user.memory2[0]=="English") {
 			cout<<"Ostrakon : "<<user.ostrakon;
-			int now2=do_menu(3);
-			if(now2==1) {
-				if(user.ostrakon>=50) {
-					user.memory1[0]++;
-				} else {
-					CLEAR;
-					cout<<"Your Ostrakon Isn't Enough!";
-					goto menu3;
+		} else if(user.memory2[0]=="Simplified Chinese") {
+			cout<<"陶片 : "<<user.ostrakon;
+		}
+		now2=do_menu(3);
+		if(now2==1) {
+			if(user.ostrakon>=50) {
+				user.memory1[1]++;
+				user.ostrakon-=50;
+				CLEAR;
+				if(user.memory2[0]=="English") {
+					cout<<"Purchase succeeded!(Press any key to continue)";
+				} else if(user.memory2[0]=="Simplified Chinese") {
+					cout<<"购买成功!(按任意键继续)";
 				}
+				char c=getch();
+				_save();
+				
+				goto menu3; 
 			} else {
-				if(now2==2) {
-					goto menu1;
-				} else {
-					goto menu3;
+				CLEAR;
+				if(user.memory2[0]=="English") {
+					cout<<"Your ostrakons isn't enough!";
+				} else if(user.memory2[0]=="Simplified Chinese") {
+					cout<<"你的陶片不够了!";
 				}
+				
+				goto menu3;
 			}
 		} else {
-			if(now==3) {
-				CLEAR;
-				cout<<"My ostrakons : "<<user.ostrakon<<endl;
-				cout<<"The fastest JFCA : "<<user.memory1[0]<<"ms"<<endl;
-				Sleep(100);
-				char c=0;
-				while(c==0) c=getch();
-				goto menu1; 
+			if(now2==2) {
+				goto menu1;
 			} else {
-				if(now==4) {
-					_save();
-					goto menu1;
-				} else {
-					if(now==5) {
-						exit(0);
-					} else {
-						goto menu1;
-					}
-				}
+				goto menu3;
 			}
 		}
+		break;
+	case 3:
+		CLEAR;
+		if(user.memory2[0]=="English") {
+			cout<<"My ostrakons : "<<user.ostrakon<<endl;
+			cout<<"The fastest JFCA : "<<user.memory1[0]<<"ms"<<endl;
+			cout<<endl;
+			cout<<"Cappuccino : "<<user.memory1[1];
+		} else if(user.memory2[0]=="Simplified Chinese") {
+			cout<<"我的陶片 : "<<user.ostrakon<<endl;
+			cout<<"最快机惨 : "<<user.memory1[0]<<"毫秒"<<endl;
+			cout<<endl;
+			cout<<"卡布奇诺 : "<<user.memory1[1];
+		}
+		PAUSE;
+		goto menu1;
+		break;
+	case 4:
+menu4:
+		CLEAR;
+		now2=do_menu(4);
+		switch(now2)
+		{
+		case 1:
+menu5:
+			CLEAR;
+			now3=do_menu(5);
+			switch(now3)
+			{
+			case 1:
+				user.memory2[0]="Simplified Chinese";
+				_save();
+				gotoxy(0,0);
+				cout<<"设置成功!";
+				menus_init();
+				JC_init();
+				PAUSE;
+				goto menu5;
+				break;
+			case 2:
+				user.memory2[0]="English";
+				_save();
+				gotoxy(0,0);
+				cout<<"Set successfully!";
+				menus_init();
+				JC_init();
+				PAUSE;
+				goto menu5;
+				break;
+			case 3:
+				goto menu4;
+				break;
+			}
+			break;
+		case 2:
+change_the_password:
+			CLEAR;
+			gotoxy(0,0);
+			if(user.memory2[0]=="English") {
+				cout<<"Please keyin the password:\n";
+			} else if(user.memory2[0]=="Simplified Chinese") {
+				cout<<"请输入密码:\n";
+			}
+			cin>>passin;
+			if(passin==user.password) {
+				if(user.memory2[0]=="English") {
+					cout<<"Please keyin the new password:\n";
+				} else if(user.memory2[0]=="Simplified Chinese") {
+					cout<<"请输入新密码:\n";
+				}
+				cin>>newpass;
+				user.password=newpass;
+				if(user.memory2[0]=="English") {
+					cout<<"Set successfully!(Saving...)";
+				} else if(user.memory2[0]=="Simplified Chinese") {
+					cout<<"设置成功!";
+				}
+				PAUSE;
+				_save();
+				goto menu4;
+			} else {
+				if(user.memory2[0]=="English") {
+					cout<<"The password is wrong, please keyin again.";
+					PAUSE;
+					CLEAR;
+					goto change_the_password;
+				} else if(user.memory2[0]=="Simplified Chinese") {
+					cout<<"密码错误,请重新输入.";
+					PAUSE;
+					CLEAR;
+					goto change_the_password;
+				}
+			}
+		case 3:
+			goto menu1;
+			break;
+		}
+		break;
+	case 5:
+		_save();
+		exit(0);
+		break;
 	}
 	return 0;
 }
@@ -427,7 +551,7 @@ void regis() {
 _register:
 	system("cls");
 	string username="";
-	cout<<"请输入用户名:"<<endl;
+	cout<<"Please keyin the username:"<<endl;
 	cin>>username;
 	bool find=0;
 	for(int i=0;i<users.size();i++) {
@@ -437,26 +561,26 @@ _register:
 		}
 	}
 	if(find) {
-		cout<<"该用户名已存在,请重新注册.";
-		Sleep(2000);
+		cout<<"The user name already exists. Please change a name and register again.";
+		PAUSE;
 		system("cls");
 		gotoxy(0,0);
 		goto _register;
 	}
 	string password1="";
-	cout<<"请输入密码:"<<endl;
+	cout<<"Please keyin the password:"<<endl;
 	cin>>password1;
 	string password2="";
-	cout<<"请重复密码:"<<endl;
+	cout<<"Please repeat the password:"<<endl;
 	cin>>password2;
 	if(password1!=password2) {
-		cout<<"两次密码不一致,请重新注册.";
-		Sleep(2000);
+		cout<<"The passwords are not the same twice. Please register again.";
+		PAUSE;
 		system("cls");
 		gotoxy(0,0);
 		goto _register;
 	}
-	cout<<"注册成功!"<<endl;
+	cout<<"Registered successfully!"<<endl;
 	string cmd="mkdir save\\"+username;
 	system(cmd.c_str());
 	string _path = "save\\"+username+"\\info.txt";
@@ -472,7 +596,8 @@ _register:
 	for(int i=80;i<=98;i++) cout<<encry("NULL",key)<<" ";
 	cout<<encry("NULL",key);
 	freopen("CON","w",stdout);
-	cout<<"请重新登陆.";
+	cout<<"Please login again.(Press any key to continue)";
+	PAUSE;
 	exit(0);
 }
 
@@ -482,7 +607,7 @@ void login() {
 	system("cls");
 	gotoxy(0,0);
 keyin_username:
-	cout<<"请输入用户名:\n(若未注册,输入register来注册)"<<endl;
+	cout<<"Please keyin the username:\n(If not, enter 'register' to register)"<<endl;
 	string username="";
 	cin>>username;
 	if(username=="register") {
@@ -497,9 +622,8 @@ keyin_username:
 		}
 	}
 	if(!find) {
-		cout<<"未找到此用户.";
-		c=0;
-		while(c==0) c=getch();
+		cout<<"This user was not found. Please login again.";
+		PAUSE;
 		system("cls");
 		gotoxy(0,0);
 		goto keyin_username;
@@ -539,26 +663,25 @@ keyin_username:
 	ss<<ostrakon_s;
 	ss>>ostrakon;
 	for(int i=0;i<90;i++) {
-		ss<<memory3_s[i];
-		ss>>memory3[i];
+		stringstream ss2;
+		ss2<<memory3_s[i];
+		ss2>>memory3[i];
 	}
-	cout<<"请输入密码:"<<endl;
+	cout<<"Please keyin the password:"<<endl;
 	string passin;
 	cin>>passin;
 	if(passin==password) {
-		cout<<"登陆成功!";
+		cout<<"Login successfully! "<<user.memory2[0];
 		user=_user(username,passin,ostrakon);
 		user.update(memory3,memory4);
-		c=0;
-		while(c==0) c=getch();
+		PAUSE
 		return;
 	} else {
-		cout<<"密码错误,请重新登陆.";
-		system("cls");
-		gotoxy(0,0);
+		cout<<"The password is wrong, please log in again.";
+		PAUSE;
+		CLEAR;
 		goto keyin_username;
 	}
-	
 }
 
 void _save() {
@@ -573,10 +696,12 @@ void _save() {
 	ss>>ostrakon_s;
 	fprintf(fout,"%d %s %s ",key,encry(user.password,key).c_str(),encry(ostrakon_s,key).c_str());
 	for(int i=0;i<=89;i++) {
+		stringstream ss2;
 		string memory1_s;
-		ss<<user.memory1[i];
-		ss>>memory1_s;
+		ss2<<user.memory1[i];
+		ss2>>memory1_s;
 		fprintf(fout,"%s ",encry(memory1_s,key).c_str());
+		//fprintf(fout,"%s ",memory1_s.c_str());
 	}
 	for(int i=0;i<=8;i++)
 		fprintf(fout,"%s ",encry(user.memory2[i],key).c_str());
@@ -626,26 +751,73 @@ void map_init() {
 	}
 }
 
-void init() {
-	student_init();
-	player_init();
+void users_init() {
 	getSubdirs("save",users);
-	
-	menu[1].push_back("Empty");
-	menu[1].push_back("1.Start");
-	menu[1].push_back("2.Shop");
-	menu[1].push_back("3.Bag");
-	menu[1].push_back("4.Save");
-	menu[1].push_back("5.Exit");
-	
-	menu[2].push_back("Empty");
-	menu[2].push_back("1.Classic Mode");
-	menu[2].push_back("2.Teacher Mode");
-	menu[2].push_back("3.Back");
-	
-	menu[3].push_back("Empty");
-	menu[3].push_back("1.Cappuccino - 50");
-	menu[3].push_back("2.Back");
+}
+
+void menus_init() {
+	for(int i=1;i<100;i++) menu[i].clear();
+	if(user.memory2[0]=="English") {
+		menu[1].push_back("Empty");
+		menu[1].push_back("1.Start");
+		menu[1].push_back("2.Shop");
+		menu[1].push_back("3.Bag");
+		menu[1].push_back("4.Setting");
+		menu[1].push_back("5.Exit&Save");
+		
+		menu[2].push_back("Empty");
+		menu[2].push_back("1.Classic Mode");
+		menu[2].push_back("2.Teacher Mode");
+		menu[2].push_back("3.Back");
+		
+		menu[3].push_back("Empty");
+		menu[3].push_back("1.Cappuccino - 50");
+		menu[3].push_back("2.Back");
+		
+		menu[4].push_back("Empty");
+		menu[4].push_back("1.Language");
+		menu[4].push_back("2.Change the password");
+		menu[4].push_back("3.Back");
+		
+		menu[5].push_back("Empty");
+		menu[5].push_back("1.简体中文");
+		menu[5].push_back("2.English");
+		menu[5].push_back("3.Back");
+	} else if(user.memory2[0]=="Simplified Chinese") {
+		menu[1].push_back("Empty");
+		menu[1].push_back("1.开始");
+		menu[1].push_back("2.商店");
+		menu[1].push_back("3.背包");
+		menu[1].push_back("4.设置");
+		menu[1].push_back("5.退出并保存");
+		
+		menu[2].push_back("Empty");
+		menu[2].push_back("1.经典模式");
+		menu[2].push_back("2.老师模式");
+		menu[2].push_back("3.返回");
+		
+		menu[3].push_back("Empty");
+		menu[3].push_back("1.卡布奇诺 - 50");
+		menu[3].push_back("2.返回");
+		
+		menu[4].push_back("Empty");
+		menu[4].push_back("1.语言设置");
+		menu[4].push_back("2.更改密码");
+		menu[4].push_back("3.返回");
+		
+		menu[5].push_back("Empty");
+		menu[5].push_back("1.简体中文");
+		menu[5].push_back("2.English");
+		menu[5].push_back("3.返回");
+	} else {
+		user.memory2[0]="English";
+		
+		menus_init();
+	}
+}
+
+void JC_init() {
+#include "init.hpp"
 }
 
 void game_init() {
@@ -671,7 +843,6 @@ void start_classic() {
 		//for(int i=1;i<=17;i++) st[i].go_back();
 		/*
 		if(go_back) {
-			Sleep(100);
 			for(int i=1;i<=17;i++) {
 				st[i].go_back();
 			}
@@ -687,12 +858,11 @@ void start_classic() {
 	    	char c=getch();
 	    	if(jcer.getx()==44&&jcer.gety()==15&&c=='w') {
 				int x=0,y=0;
-				char c=0;
 				system("cls");
 				gotoxy(x,y);
+				
 				cout<<jc10;
-				Sleep(100);
-				while(c==0) c=getch();
+				PAUSE
 			} else if(jcer.check2()&&c=='w') {
 				JC(name_pos[jcer.gety()][jcer.getx()]);
 			} else {
@@ -753,26 +923,25 @@ void start_teacher() {
 			tc.coffee_time();
 		}
 		
-		
-		
 		if(tc.count>=50) {
 			tc.count=0;
 			tc.move();
 		} else tc.count++;
 		
+		jcer.print('x');
+		
 	    if (!_kbhit()) {
 	    	
 		} else {
 	    	char c=getch();
-	    	if(jcer.getx()==44&&jcer.gety()==15&&c=='w') {
+	    	if(jcer.getx()==44&&jcer.gety()==15&&c=='w'&&!tc.in_the_classroom()) {
 				int x=0,y=0;
 				char c=0;
 				system("cls");
 				gotoxy(x,y);
 				cout<<jc10;
-				Sleep(100);
-				while(c==0) c=getch();
-			} else if(jcer.check2()&&c=='w') {
+				PAUSE;
+			} else if(jcer.check2()&&c=='w'&&!tc.in_the_classroom()) {
 				JC(name_pos[jcer.gety()][jcer.getx()]);
 			} else if(jcer.check3()&&c=='s'&&have_JCed_the_teacher==0) {
 				JC_the_teacher();
@@ -814,7 +983,11 @@ int time_end;
 void update_clock(int beg,int x,int y) {
 	gotoxy(x,y-1);
 	time_end=clock()-beg;
-	cout<<"Time : "<<time_end<<"ms";
+	if(user.memory2[0]=="English") {
+		cout<<"Time : "<<time_end<<"ms";
+	} else if(user.memory2[0]=="Simplified Chinese") {
+		cout<<"用时 : "<<time_end<<"毫秒";
+	}
 }
 
 void JC(string s) {
@@ -900,8 +1073,7 @@ void JC(string s) {
 	gotoxy(x+13,y+3);
 	cout<<s;
 	
-	c=0;
-	while(c==0) c=getch();
+	PAUSE;
 	user.ostrakon++;
 	if(user.memory1[0]==0) {
 		user.memory1[0]=time_end;
@@ -928,7 +1100,11 @@ void JC_the_teacher() {
 	color(7);
 	while(clock()-begin_time<=10000) {
 		gotoxy(1,2);
-		cout<<"time : "<<clock()-begin_time<<"ms";
+		if(user.memory2[0]=="English") {
+			cout<<"Time : "<<clock()-begin_time<<"ms";
+		} else if(user.memory2[0]=="Simplified Chinese") {
+			cout<<"用时 : "<<clock()-begin_time<<"毫秒";
+		}
 		gotoxy(nowx,nowy);
 		if(!kbhit()) {
 			
@@ -1049,8 +1225,7 @@ void JC_the_teacher() {
 			    		CLEAR;
 			    		gotoxy(0,0);
 			    		cout<<jc10;
-			    		char pr=0;
-			    		while(pr==0) pr=getch();
+			    		PAUSE
 					} else JC(st[y2*6+x2].getname());
 					int JC_end=clock();
 					begin_time+=JC_end-JC_begin;
@@ -1072,6 +1247,14 @@ int mymin(int x,int y) {return x<y?x:y;}
 
 int do_menu(int id) {
 	CLEAR;
+	if(id==3) {
+		gotoxy(0,0);
+		if(user.memory2[0]=="English") {
+			cout<<"Ostrakon : "<<user.ostrakon;
+		} else if(user.memory2[0]=="Simplified Chinese") {
+			cout<<"陶片 : "<<user.ostrakon;
+		}
+	}
 	for(int i=1;i<=menu[id].size()-1;i++) {
 		gotoxy(1,i);
 		cout<<menu[id][i]<<endl;

@@ -56,11 +56,31 @@
 
 >哎呀这咖啡怎么这么好喝
 
+### `Bag`
+
+你的仓库.
+
+这里面有各种内容
+
+>要不要加入成就系统?   
+>
+>---`ForkKillet`
+
+## 极域电子教室系统
+
+一个梗...
+
+您可以通过它控制同学的电脑并`JC`他!
+
+### `Teacher`
+
+喜欢喝咖啡和暴政学生.
+
+当老师在教室的时候,您不能`JC`同学.
+
 ### `Save`
 
-位于主菜单中.
-
-玩好游戏之后记得保存!`(不然就什么都没了)`
+本游戏自动保存.
 
 ### `Register`
 
@@ -73,6 +93,20 @@
 用于登陆.
 
 若您没有账号,可输入`register`,游戏会跳转到注册界面.
+
+### `Setting`
+
+设置.
+
+### 简体中文
+
+就是这个啦~
+
+### `English`
+
+就是英语啦...
+
+>`Optimize_2 cannot all kill the International Olympic Informatic.`
 
 ### `password.hpp`
 
@@ -100,4 +134,4 @@ string decry(string s,int key);
 
 `JCer开发组` : `707285884`.
 
-`JCer`目前属于[IceLava工作室](http://icelava.top).
+`JCer`目前属于[IceLava团队](http://icelava.top).
